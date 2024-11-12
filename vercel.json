@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "destination": "http://your-domain.com/$1",
+      "destination": "http://html-uehu.vercel.app/$1",
       "permanent": true
     }
   ]
