@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "http://html-uehu.vercel.app/$1",
-      "permanent": true
-    }
-  ]
-}
