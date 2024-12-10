@@ -1,1 +1,48 @@
-<p>这是一个静态网站</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <header>
+        <h1>欢迎来到我的网站</h1>
+        <!-- 网站的导航或其他头部内容 -->
+    </header>
+
+    <main>
+        <section>
+            <p>页面加载时会发起一个HTTP GET请求。</p>
+            <!-- 页面的主要内容 -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 我的公司名称. 版权所有.</p>
+        <!-- 网站的底部内容 -->
+    </footer>
+
+    <!-- 内联 JavaScript -->
+    <script>
+        async function httpGet() {
+            try {
+                let response = await fetch('http://jie.ueuo.com/api.php?act=index');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                let data = await response.json(); // 假设服务器返回JSON数据
+                console.log(data); // 在控制台打印返回的数据
+            } catch (error) {
+                console.error('There has been a problem with your fetch operation:', error);
+            }
+        }
+
+        // 页面加载完成后调用httpGet函数
+        window.addEventListener('load', httpGet);
+    </script>
+
+    <!-- 外部 JavaScript 文件 -->
+    <!-- <script src="scripts.js"></script> -->
+</body>
+</html>
