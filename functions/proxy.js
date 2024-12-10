@@ -2,23 +2,22 @@ export async function onRequest(context) {
   // 获取原始请求 URL
   const url = new URL(context.request.url);
 
-  // 使用正则表达式提取 "/api/" 到下一个 "/" 之间的内容
-  const match = url.pathname.match(/^\/api\/([^\/]+)/);
-  if (!match) {
-    return new Response('Not Found', { status: 404 });
-  }
+  // 提取查询参数的 key 和 value
+  const [key, value] = url.search.replace('?', '').split('=');
 
-  // 获取 "/api/" 后的部分作为 act 参数值
-  const action = match[1];
+  // 如果没有查询参数，返回错误
+  if (!key || !value) {
+    return new Response('Invalid query parameters', { status: 400 });
+  }
 
   // 构建目标 URL
   const targetUrl = new URL(`http://jie.ueuo.com/api.php`);
-  targetUrl.searchParams.set('act', action);
+  targetUrl.searchParams.set(key, value); // 将解析出的 key 和 value 添加为参数
 
-  // 将原始请求中的所有查询参数附加到目标 URL
-  for (const [key, value] of url.searchParams) {
-    if (key !== 'act') { // 避免重复设置 act 参数
-      targetUrl.searchParams.set(key, value);
+  // 将原始请求中的其他查询参数附加到目标 URL
+  for (const [paramKey, paramValue] of url.searchParams) {
+    if (paramKey !== key) {
+      targetUrl.searchParams.set(paramKey, paramValue);
     }
   }
 
@@ -26,7 +25,7 @@ export async function onRequest(context) {
   const newRequest = new Request(targetUrl.toString(), {
     method: context.request.method,
     headers: context.request.headers,
-    body: context.request.method !== 'GET' && context.request.method !== 'HEAD' ? await context.request.text() : null, // 保留请求体
+    body: context.request.method !== 'GET' && context.request.method !== 'HEAD' ? await context.request.text() : null,
   });
 
   // 代理请求到目标接口
