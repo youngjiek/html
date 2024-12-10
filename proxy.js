@@ -2,7 +2,7 @@ export async function onRequest(context) {
   const { pathname, search } = new URL(context.request.url);
 
   // 目标 HTTP API 的基础 URL
-  const targetApiBase = 'http://example.com';
+  const targetApiBase = 'http://jie.ueuo.com/api.php?act=/';
 
   // 拼接完整的目标 URL
   const targetUrl = `${targetApiBase}${pathname}${search}`;
