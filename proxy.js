@@ -1,20 +1,21 @@
+const cache = caches.default;
+
 export async function onRequest(context) {
-  // 获取请求的路径和参数
   const { pathname, search } = new URL(context.request.url);
+  const cacheKey = new Request(context.request.url, context.request);
+  let response = await cache.match(cacheKey);
 
-  // 拼接代理地址
-  const workersUrl = `https://your-workers-url.workers.dev${pathname}${search}`;
+  if (!response) {
+    const workersUrl = `https://your-workers-url.workers.dev${pathname}${search}`;
+    response = await fetch(workersUrl, {
+      method: context.request.method,
+      headers: context.request.headers,
+      body: context.request.body,
+    });
+    response = new Response(response.body, response);
+    response.headers.append('Cache-Control', 's-maxage=3600');
+    await cache.put(cacheKey, response.clone());
+  }
 
-  // 转发请求到 Workers
-  const response = await fetch(workersUrl, {
-    method: context.request.method,
-    headers: context.request.headers,
-    body: context.request.body,
-  });
-
-  // 返回 Workers 的响应
-  return new Response(response.body, {
-    status: response.status,
-    headers: response.headers,
-  });
+  return response;
 }
