@@ -1,4 +1,0 @@
-[[d1_databases]]
-binding = "jksql" # 在 Worker 中使用的绑定名称
-database_name = "jktop1" # 数据库名称
-database_id = "086690ee-b11e-4ae8-924d-622baf03cd7c" # 数据库唯一 ID
