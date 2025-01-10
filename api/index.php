@@ -1,2 +1,3 @@
 <?php
-var_dump(3+4);exit;
+var_dump(3+4);
+exit;
