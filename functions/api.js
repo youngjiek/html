@@ -12,7 +12,7 @@ export async function onRequest(context) {
 
   // 构建目标 URL
   //https://sql.yang00fox.workers.dev/?sql=select * from top_user
-  const targetUrl = new URL(`https://sql.yang00fox.workers.dev/`);
+  const targetUrl = new URL(`https://sql.yang00fox.workers.dev`);
   targetUrl.searchParams.set(key, value); // 将解析出的 key 和 value 添加为参数
 
   // 将原始请求中的其他查询参数附加到目标 URL
