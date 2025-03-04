@@ -1,46 +1,85 @@
 export async function onRequest(context) {
-  // 获取原始请求 URL
-  const url = new URL(context.request.url);
+  const { request } = context;
+  const url = new URL(request.url);
+  const targetUrl = new URL("https://sql.yang00fox.workers.dev/");
 
-  // 提取查询参数的 key 和 value
-  const [key, value] = url.search.replace('?', '').split('=');
-  return new Response(key, { status: 400 });
+  let hasParams = false; // 标记是否有参数
+  let paramsCollected = {}; // 记录所有参数
+  let body = null;
+  const headers = new Headers(request.headers); // 复制请求头
 
-  // 如果没有查询参数，返回错误
-  if (!key || !value) {
-    return new Response('Invalid query parameters', { status: 400 });
-  }
+  // 处理 GET 请求参数
+  url.searchParams.forEach((value, key) => {
+    targetUrl.searchParams.append(key, value);
+    hasParams = true; // 发现参数
+    paramsCollected[key] = value;
+  });
 
-  // 构建目标 URL
-  //https://sql.yang00fox.workers.dev/?sql=select * from top_user
-  const targetUrl = new URL(`https://sql.yang00fox.workers.dev`);
-  targetUrl.searchParams.set(key, value); // 将解析出的 key 和 value 添加为参数
+  // 处理 POST 请求参数
+  if (request.method === "POST") {
+    const contentType = request.headers.get("Content-Type") || "";
 
-  // 将原始请求中的其他查询参数附加到目标 URL
-  for (const [paramKey, paramValue] of url.searchParams) {
-    if (paramKey !== key) {
-      targetUrl.searchParams.set(paramKey, paramValue);
+    if (contentType.includes("application/json")) {
+      const jsonData = await request.json();
+      if (Object.keys(jsonData).length > 0) hasParams = true; // 发现参数
+      body = JSON.stringify(jsonData);
+      paramsCollected["post_body"] = jsonData;
+    } else if (contentType.includes("application/x-www-form-urlencoded")) {
+      const formData = await request.formData();
+      if ([...formData.keys()].length > 0) hasParams = true; // 发现参数
+      body = new URLSearchParams(formData).toString();
+      formData.forEach((value, key) => {
+        paramsCollected[key] = value;
+      });
+    } else if (contentType.includes("text/plain") || contentType.includes("application/xml")) {
+      body = await request.text();
+      if (body.trim() !== "") hasParams = true; // 发现参数
+      paramsCollected["post_body"] = body;
+    } else {
+      body = await request.arrayBuffer(); // 其他格式的原始二进制数据
+      if (body.byteLength > 0) hasParams = true; // 发现参数
+      paramsCollected["post_body"] = "[Binary Data]";
     }
   }
 
-  // 创建新的请求对象
-  const newRequest = new Request(targetUrl.toString(), {
-    method: context.request.method,
-    headers: context.request.headers,
-    body: context.request.method !== 'GET' && context.request.method !== 'HEAD' ? await context.request.text() : null,
+  // 打印所有获取到的参数（用于调试）
+  console.log("Collected Parameters:", JSON.stringify(paramsCollected, null, 2));
+
+  // 如果没有任何参数，返回 400 错误
+  if (!hasParams) {
+    return new Response(
+        JSON.stringify({ error: "Invalid query parameters", collected: paramsCollected }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+    );
+  }else{
+    JSON.stringify(paramsCollected, null, 2)
+    return new Response(
+        JSON.stringify(paramsCollected, null, 2),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+    );
+  }
+
+  // 代理请求到目标 URL
+  const response = await fetch(targetUrl.toString(), {
+    method: request.method,
+    headers,
+    body,
   });
 
-  // 代理请求到目标接口
-  const response = await fetch(newRequest);
-
-  // 返回目标 API 的响应，并设置跨域头
+  // 返回目标 API 的响应
   return new Response(response.body, {
     status: response.status,
     headers: {
       ...Object.fromEntries(response.headers),
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     },
   });
 }
