@@ -43,7 +43,6 @@ export async function onRequest(context) {
   }
 
   // 打印所有获取到的参数（用于调试）
-  console.log("Collected Parameters:", JSON.stringify(paramsCollected, null, 2));
 
   // 如果没有任何参数，返回 400 错误
   if (!hasParams) {
@@ -54,7 +53,7 @@ export async function onRequest(context) {
           headers: { "Content-Type": "application/json" },
         }
     );
-  }else{
+  }/*else{
     JSON.stringify(paramsCollected, null, 2)
     return new Response(
         JSON.stringify(paramsCollected, null, 2),
@@ -63,7 +62,7 @@ export async function onRequest(context) {
           headers: { "Content-Type": "application/json" },
         }
     );
-  }
+  }*/
 
   // 代理请求到目标 URL
   const response = await fetch(targetUrl.toString(), {
