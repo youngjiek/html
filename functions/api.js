@@ -4,6 +4,7 @@ export async function onRequest(context) {
 
   // 提取查询参数的 key 和 value
   const [key, value] = url.search.replace('?', '').split('=');
+  return new Response(key, { status: 400 });
 
   // 如果没有查询参数，返回错误
   if (!key || !value) {
