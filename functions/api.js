@@ -25,6 +25,7 @@ async function handleIndex(paramsCollected, env) {
     return jsonResponseErr("数据库查询失败", 500, { error: error.message });
   }
 }
+//
 
 //内部处理,不对外暴露
 export async function onRequest(context) {
@@ -92,6 +93,7 @@ export async function onRequest(context) {
     case "index":
       //执行 index 接口操作
       return await handleIndex(paramsCollected, env); // 调用独立的 index 处理函数
+    // 其他接口处理...
     default:
       return jsonResponseErr("未知访问",404);
   }
