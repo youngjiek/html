@@ -20,7 +20,7 @@ async function handleIndex(paramsCollected, env) {
     const query = "SELECT * FROM top_user";
     const result = await env.jksql.prepare(query).all();
 
-    return jsonResponseOk("欢迎使用", { users: result.results });
+    return jsonResponseOk("欢迎使用", result.results);
   } catch (error) {
     return jsonResponseErr("数据库查询失败", 500, { error: error.message });
   }
