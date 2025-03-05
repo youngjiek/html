@@ -74,22 +74,14 @@ export async function onRequest(context) {
         }
     );
   }*/
+  // 根据 参数中的 act 来进行不同的操作
+  switch (paramsCollected.act) {
+    case "index":
+      return jsonResponseOk("欢迎使用")
+    default:
+      return jsonResponseErr("未知访问",404);
+  }
 
-  // 代理请求到目标 URL
-  const response = await fetch(targetUrl.toString(), {
-    method: request.method,
-    headers,
-    body,
-  });
 
-  // 返回目标 API 的响应
-  return new Response(response.body, {
-    status: response.status,
-    headers: {
-      ...Object.fromEntries(response.headers),
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    },
-  });
+
 }
