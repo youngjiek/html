@@ -60,16 +60,10 @@ export async function onRequest(context) {
 
   // 打印所有获取到的参数（用于调试）
   // paramsCollected 包含所有参数,
-  return jsonResponseOk("ok",paramsCollected);
   // 如果没有任何参数，返回 400 错误
   if (!hasParams) {
-    return new Response(
-        JSON.stringify({ error: "Invalid query parameters", collected: paramsCollected }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-    );
+    return jsonResponseErr("Invalid query parameters",0);
+
   }/*else{
     JSON.stringify(paramsCollected, null, 2)
     return new Response(
