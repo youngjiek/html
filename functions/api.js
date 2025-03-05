@@ -1,6 +1,44 @@
+//需要区分成功和失败
+function jsonResponseOk(msg,data) {
+  // 默认状态码为 200 OK
+  const status = 200;
+  return new Response(
+      JSON.stringify({ msg:msg,data: data ,status: status })
+  );
+}
+function jsonResponseErr(msg,init,data) {
+  // 默认状态码为 0 OK
+  const status = init || 0;
+  return new Response(
+      JSON.stringify({ msg:msg,data: data ,status: status })
+  );
+}
+// 封装代理请求
+async function proxyRequest(act, post_data) {
+  const targetUrl = new URL("https://sql.yang00fox.workers.dev/");
+  targetUrl.searchParams.set("api", act); // 设置 API 动作
+
+  const options = {
+    method: "POST", // 统一使用 POST 传递数据
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(post_data)
+  };
+
+  try {
+    const response = await fetch(targetUrl.toString(), options);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return { error: error.message };
+  }
+}
+
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
+  //使用 cloudflare D1 数据库
   const targetUrl = new URL("https://sql.yang00fox.workers.dev/");
 
   let hasParams = false; // 标记是否有参数
