@@ -49,7 +49,7 @@ export default {
                 return new Response("Unsupported Content-Type", { status: 415 });
             }
         }
-        // return jsonResponseOk("ps",params);
+        return jsonResponseOk("ps",params);
 
         const post_data = params.post_data ? JSON.parse(params.post_data) : null;
         const sql = params.sql;  // 完整的 SQL 查询字符串
