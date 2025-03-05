@@ -13,9 +13,22 @@ function jsonResponseErr(msg,init,data) {
       JSON.stringify({ msg:msg,data: data ,status: status })
   );
 }
+// 处理 index 接口（独立函数）
+async function handleIndex(paramsCollected, env) {
+  try {
+    // 示例查询：从 D1 数据库获取数据
+    const query = "SELECT * FROM top_user";
+    const result = await env.jksql.prepare(query).all();
+
+    return jsonResponseOk("欢迎使用", { users: result.results });
+  } catch (error) {
+    return jsonResponseErr("数据库查询失败", 500, { error: error.message });
+  }
+}
+
 //内部处理,不对外暴露
 export async function onRequest(context) {
-  const { request } = context;
+  const { request,env } = context;
   const url = new URL(request.url);
   //使用 cloudflare D1 数据库
 
@@ -77,11 +90,9 @@ export async function onRequest(context) {
   // 根据 参数中的 act 来进行不同的操作
   switch (paramsCollected.act) {
     case "index":
-      return jsonResponseOk("欢迎使用")
+      //执行 index 接口操作
+      return await handleIndex(paramsCollected, env); // 调用独立的 index 处理函数
     default:
       return jsonResponseErr("未知访问",404);
   }
-
-
-
 }
