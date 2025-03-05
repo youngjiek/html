@@ -37,8 +37,9 @@ export async function onRequest(context) {
     if (contentType.includes("application/json")) {
       const jsonData = await request.json();
       if (Object.keys(jsonData).length > 0) hasParams = true; // 发现参数
-      body = JSON.stringify(jsonData);
-      paramsCollected["post_body"] = jsonData;
+
+      Object.assign(paramsCollected, jsonData);
+      body = jsonData; // 让 body 也存储 JSON 数据（后续可以用）
     } else if (contentType.includes("application/x-www-form-urlencoded")) {
       const formData = await request.formData();
       if ([...formData.keys()].length > 0) hasParams = true; // 发现参数
@@ -58,6 +59,7 @@ export async function onRequest(context) {
   }
 
   // 打印所有获取到的参数（用于调试）
+  // paramsCollected 包含所有参数,
   return jsonResponseOk("ok",paramsCollected);
   // 如果没有任何参数，返回 400 错误
   if (!hasParams) {
