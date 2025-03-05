@@ -13,33 +13,11 @@ function jsonResponseErr(msg,init,data) {
       JSON.stringify({ msg:msg,data: data ,status: status })
   );
 }
-// 封装代理请求
-async function proxyRequest(act, post_data) {
-  const targetUrl = new URL("https://sql.yang00fox.workers.dev/");
-  targetUrl.searchParams.set("api", act); // 设置 API 动作
-
-  const options = {
-    method: "POST", // 统一使用 POST 传递数据
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(post_data)
-  };
-
-  try {
-    const response = await fetch(targetUrl.toString(), options);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    return { error: error.message };
-  }
-}
-
+//内部处理,不对外暴露
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
   //使用 cloudflare D1 数据库
-  const targetUrl = new URL("https://sql.yang00fox.workers.dev/");
 
   let hasParams = false; // 标记是否有参数
   let paramsCollected = {}; // 记录所有参数
@@ -48,7 +26,6 @@ export async function onRequest(context) {
 
   // 处理 GET 请求参数
   url.searchParams.forEach((value, key) => {
-    targetUrl.searchParams.append(key, value);
     hasParams = true; // 发现参数
     paramsCollected[key] = value;
   });
@@ -81,7 +58,7 @@ export async function onRequest(context) {
   }
 
   // 打印所有获取到的参数（用于调试）
-
+  return jsonResponseOk("ok",paramsCollected);
   // 如果没有任何参数，返回 400 错误
   if (!hasParams) {
     return new Response(
