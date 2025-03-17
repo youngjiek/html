@@ -16,17 +16,18 @@ function jsonResponseErr(msg,init,data) {
 export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
-    return jsonResponseOk("ok",url)
     // 获取用户请求的目标网址
-    let targetPath = url.pathname.replace(/^\/url\//, ""); // 变成 "google.com"
+    const match = url.search.match(/\?(.*)/);
+    let targetPath = match ? match[1] : ""; // 提取 `?` 后面的内容
 
-    // 确保 targetPath 是一个合法的 URL
+    // 确保 targetPath 是合法的域名
     if (!targetPath || !targetPath.includes(".")) {
         return new Response("Invalid URL", { status: 400 });
     }
 
     // 组装完整的目标 URL
     let targetUrl = `https://${targetPath}`;
+    return jsonResponseOk("ok",targetUrl)
 
     try {
         let response = await fetch(targetUrl, request);
