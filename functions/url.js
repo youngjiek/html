@@ -14,28 +14,32 @@ function jsonResponseErr(msg,init,data) {
     );
 }
 export async function onRequest(context) {
-        const url = new URL(request.url);
-        return jsonResponseOk("ok",url);
-        let targetUrl = url.pathname.replace(/^\/url\//, "https://");
+    const { request } = context;
+    const url = new URL(request.url);
+    return jsonResponseOk("ok", url);
+    // 提取目标 URL
+    let targetUrl = url.pathname.replace(/^\/url\//, "https://");
 
-        // 防止非法请求
-        if (!targetUrl.startsWith("https://")) {
-            return new Response("Invalid Request", { status: 400 });
-        }
+    // 防止非法请求
+    if (!targetUrl.startsWith("https://")) {
+        return new Response("Invalid Request", { status: 400 });
+    }
 
-        // 代理目标网站
-        let response = await fetch(targetUrl, request);
-        let contentType = response.headers.get("content-type") || "";
+    // 代理目标网站
+    let response = await fetch(targetUrl, request);
+    let contentType = response.headers.get("content-type") || "";
 
-        if (contentType.includes("text/html")) {
-            let text = await response.text();
-            // 修改 HTML 页面中的所有链接，使其仍指向 /url/ 路径
-            text = text.replace(/href="https?:\/\/(.*?)"/g, `href="/url/$1"`);
-            text = text.replace(/src="https?:\/\/(.*?)"/g, `src="/url/$1"`);
+    if (contentType.includes("text/html")) {
+        let text = await response.text();
 
-            response = new Response(text, response);
-            response.headers.set("content-type", "text/html; charset=utf-8");
-        }
+        // 修改 HTML 页面中的所有链接，使其仍然指向 /url/ 路径
+        text = text.replace(/href="https?:\/\/(.*?)"/g, `href="/url/$1"`);
+        text = text.replace(/src="https?:\/\/(.*?)"/g, `src="/url/$1"`);
 
-        return response;
-};
+        response = new Response(text, response);
+        response.headers.set("content-type", "text/html; charset=utf-8");
+    }
+
+    return response;
+}
+
