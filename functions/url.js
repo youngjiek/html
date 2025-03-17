@@ -16,10 +16,9 @@ function jsonResponseErr(msg,init,data) {
 export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
-    return jsonResponseErr("ok");
     // 提取目标 URL
     let targetUrl = url.pathname.replace(/^\/url\//, "https://");
-
+    return jsonResponseOk("ok", targetUrl);
     // 防止非法请求
     if (!targetUrl.startsWith("https://")) {
         return new Response("Invalid Request", { status: 400 });
