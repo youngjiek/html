@@ -13,8 +13,7 @@ function jsonResponseErr(msg,init,data) {
         JSON.stringify({ msg:msg,data: data ,status: status })
     );
 }
-export default {
-    async fetch(request) {
+export async function onRequest(context) {
         const url = new URL(request.url);
         return jsonResponseOk("ok",url);
         let targetUrl = url.pathname.replace(/^\/url\//, "https://");
@@ -39,5 +38,4 @@ export default {
         }
 
         return response;
-    }
 };
