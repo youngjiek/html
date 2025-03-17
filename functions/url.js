@@ -17,7 +17,6 @@ export default {
     async fetch(request) {
         const url = new URL(request.url);
         return jsonResponseOk("ok",url);
-
         let targetUrl = url.pathname.replace(/^\/url\//, "https://");
 
         // 防止非法请求
