@@ -16,7 +16,7 @@ function jsonResponseErr(msg,init,data) {
 export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
-
+    return jsonResponseOk("ok",url)
     // 获取用户请求的目标网址
     let targetPath = url.pathname.replace(/^\/url\//, ""); // 变成 "google.com"
 
