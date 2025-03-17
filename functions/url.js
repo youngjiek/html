@@ -27,7 +27,6 @@ export async function onRequest(context) {
 
     // 组装完整的目标 URL
     let targetUrl = `https://${targetPath}`;
-    return jsonResponseOk("ok",targetUrl)
 
     try {
         let response = await fetch(targetUrl, request);
