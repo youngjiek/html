@@ -16,7 +16,7 @@ function jsonResponseErr(msg,init,data) {
 export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
-    return jsonResponseOk("ok", url);
+    return jsonResponseErr("ok");
     // 提取目标 URL
     let targetUrl = url.pathname.replace(/^\/url\//, "https://");
 
