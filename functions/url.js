@@ -1,6 +1,23 @@
+//需要区分成功和失败
+function jsonResponseOk(msg,data) {
+    // 默认状态码为 200 OK
+    const status = 200;
+    return new Response(
+        JSON.stringify({ msg:msg,data: data ,status: status })
+    );
+}
+function jsonResponseErr(msg,init,data) {
+    // 默认状态码为 0 OK
+    const status = init || 0;
+    return new Response(
+        JSON.stringify({ msg:msg,data: data ,status: status })
+    );
+}
 export default {
     async fetch(request) {
         const url = new URL(request.url);
+        return jsonResponseOk("ok",url);
+
         let targetUrl = url.pathname.replace(/^\/url\//, "https://");
 
         // 防止非法请求
