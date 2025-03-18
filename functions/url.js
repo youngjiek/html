@@ -16,13 +16,13 @@ export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
 
-    // **问号前**是代理前缀，例如 `https://mh.youngjk.top/url/`
+    // 获取代理前缀（问号前的部分）
     let proxyPrefix = `${url.origin}${url.pathname.split("?")[0]}?`;
 
-    // **问号后**是需要代理的目标地址
-    let targetPath = url.searchParams.toString(); // 直接获取 `?` 后的内容
+    // 获取问号后面的目标地址
+    let targetPath = url.search.substring(1); // 直接去掉 "?"，获取 "google.com"
 
-    // 确保 targetPath 是合法的域名
+    // 确保 targetPath 是合法域名
     if (!targetPath || !targetPath.includes(".")) {
         return jsonResponseErr("Invalid URL");
     }
