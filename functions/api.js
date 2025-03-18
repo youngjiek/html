@@ -1,3 +1,5 @@
+//无 vpn 时访问更高效
+
 //需要区分成功和失败
 function jsonResponseOk(msg,data) {
   // 默认状态码为 200 OK
@@ -71,7 +73,6 @@ export async function onRequest(context) {
       paramsCollected["post_body"] = "[Binary Data]";
     }
   }
-
   // 打印所有获取到的参数（用于调试）
   // paramsCollected 包含所有参数,
   // 如果没有任何参数，返回 400 错误
@@ -91,7 +92,7 @@ export async function onRequest(context) {
   // 根据 参数中的 act 来进行不同的操作
   switch (paramsCollected.act) {
     case "index":
-      //执行 index 接口操作
+      //执行 index 接口操作,在接口内部根据接口情况再判断是否需要检查token
       return await handleIndex(paramsCollected, env); // 调用独立的 index 处理函数
     // 其他接口处理...
     default:
