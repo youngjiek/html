@@ -1,53 +1,65 @@
-//需要区分成功和失败
-function jsonResponseOk(msg,data) {
-    // 默认状态码为 200 OK
-    const status = 200;
-    return new Response(
-        JSON.stringify({ msg:msg,data: data ,status: status })
-    );
+// 成功响应
+function jsonResponseOk(msg, data) {
+    return new Response(JSON.stringify({ msg: msg, data: data, status: 200 }), {
+        headers: { "Content-Type": "application/json" }
+    });
 }
-function jsonResponseErr(msg,init,data) {
-    // 默认状态码为 0 OK
-    const status = init || 0;
-    return new Response(
-        JSON.stringify({ msg:msg,data: data ,status: status })
-    );
+
+// 失败响应
+function jsonResponseErr(msg, init, data) {
+    return new Response(JSON.stringify({ msg: msg, data: data, status: init || 0 }), {
+        headers: { "Content-Type": "application/json" }
+    });
 }
+
 export async function onRequest(context) {
     const { request } = context;
     const url = new URL(request.url);
-    // 获取用户请求的目标网址
-    const match = url.search.match(/\?(.*)/);
-    let targetPath = match ? match[1] : ""; // 提取 `?` 后面的内容
+
+    // **问号前**是代理前缀，例如 `https://mh.youngjk.top/url/`
+    let proxyPrefix = `${url.origin}${url.pathname.split("?")[0]}?`;
+
+    // **问号后**是需要代理的目标地址
+    let targetPath = url.searchParams.toString(); // 直接获取 `?` 后的内容
 
     // 确保 targetPath 是合法的域名
     if (!targetPath || !targetPath.includes(".")) {
-        return new Response("Invalid URL", { status: 400 });
+        return jsonResponseErr("Invalid URL");
     }
 
     // 组装完整的目标 URL
     let targetUrl = `https://${targetPath}`;
 
     try {
-        let response = await fetch(targetUrl, request);
+        let response = await fetch(targetUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0' } // 伪装请求，防止被拦截
+        });
+
         let contentType = response.headers.get("content-type") || "";
 
-        // 如果是 HTML，则修改内部链接，使其仍然走代理
+        // 如果是 HTML 页面
         if (contentType.includes("text/html")) {
             let text = await response.text();
 
-            // 替换所有超链接，使其仍然在 `/url/` 下
-            text = text.replace(/href="https?:\/\/(.*?)"/g, `href="/url/$1"`);
-            text = text.replace(/src="https?:\/\/(.*?)"/g, `src="/url/$1"`);
+            // 替换 HTML 页面中的所有 `<a>` 和 `<script>` 相关跳转
+            text = text.replace(/(href|src)="(https?:\/\/[^"]+)"/g, (match, attr, link) => {
+                return `${attr}="${proxyPrefix}${encodeURIComponent(link)}"`;
+            });
+
+            // 移除 `<meta http-equiv="refresh">`
+            text = text.replace(/<meta[^>]*http-equiv=["']refresh["'][^>]*>/gi, "");
+
+            // 禁止 `window.location` 相关 JavaScript 跳转
+            text = text.replace(/window\.location\s*=\s*['"](.*?)['"]/g, "// window.location disabled");
 
             response = new Response(text, response);
             response.headers.set("content-type", "text/html; charset=utf-8");
+
+            return response;
         }
 
         return response;
     } catch (error) {
-        return new Response(`Error fetching ${targetUrl}: ${error}`, { status: 500 });
+        return jsonResponseErr(`Error fetching ${targetUrl}: ${error}`);
     }
 }
-
-
